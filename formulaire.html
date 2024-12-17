@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulaire Carte Membre</title>
+  <link rel="stylesheet" href="formulaire.css">
+</head>
+<body>
+  <div class="form-container">
+    <form id="form">  
+      <div class="form-row">
+        <div class="form-column">
+          <label for="prenom">Prénom :</label>
+          <input type="text" id="prenom" name="prenom" required>
+
+          <label for="region">Région :</label>
+          <input type="text" id="region" name="region" required>
+
+
+          <label for="tel">N° de téléphone :</label>
+          <input type="text" id="tel" name="tel" required>
+
+          <label for="naissance">Date et lieu de naissance :</label>
+          <input type="text" id="naissance" name="naissance" required>
+
+          <label for="cni">N° Carte CNI :</label>
+          <input type="text" id="cni" name="cni" required>
+
+          
+        </div>
+
+        <div class="form-column">
+          <label for="nom">Nom :</label>
+          <input type="text" id="nom" name="nom" required>
+          
+          <label for="departement">Département :</label>
+          <input type="text" id="departement" name="departement" required>
+
+          <label for="commune">Commune :</label>
+          <input type="text" id="commune" name="commune" required>
+
+          <label for="adresse">Adresse :</label>
+          <input type="text" id="adresse" name="adresse" required>
+
+          <label for="electeur">N° Carte d'Électeur :</label>
+          <input type="text" id="electeur" name="electeur" required>
+        </div>
+      </div>
+      <label for="photo">Photo :</label>
+          <input type="file" id="photo" name="photo" accept="image/*" required>
+      <button type="submit">Générer la carte</button>
+    </form>
+  </div>
+
+  <script>
+      // Ajouter cette fonction de validation
+      function validatePhoneNumber(phone) {
+          // Nettoyer le numéro
+          phone = phone.replace(/[^0-9]/g, '');
+          
+          // Vérifier si le numéro commence par 221
+          if (!phone.startsWith('221')) {
+              phone = '221' + phone;
+          }
+          
+          // Vérifier la longueur
+          return phone.length === 12;
+      }
+
+      document.getElementById("tel").addEventListener('input', function(e) {
+          let phone = e.target.value.replace(/[^0-9]/g, '');
+          if (phone.length > 12) {
+              phone = phone.slice(0, 12);
+          }
+          e.target.value = phone;
+      });
+
+      document.getElementById("form").addEventListener("submit", function(event) {
+          event.preventDefault();
+          
+          // Valider le numéro de téléphone
+          const tel = document.getElementById("tel").value;
+          if (!validatePhoneNumber(tel)) {
+              alert("Le numéro de téléphone doit être au format: 221XXXXXXXXX");
+              return;
+          }
+          
+          // Créer un objet FormData pour envoyer les données incluant le fichier
+          const formData = new FormData();
+          formData.append("prenom", document.getElementById("prenom").value);
+          formData.append("nom", document.getElementById("nom").value);
+          formData.append("tel", document.getElementById("tel").value);
+          formData.append("naissance", document.getElementById("naissance").value);
+          formData.append("region", document.getElementById("region").value);
+          formData.append("departement", document.getElementById("departement").value);
+          formData.append("commune", document.getElementById("commune").value);
+          formData.append("adresse", document.getElementById("adresse").value);
+          formData.append("cni", document.getElementById("cni").value);
+          formData.append("electeur", document.getElementById("electeur").value);
+          
+          const photoFile = document.getElementById("photo").files[0];
+          if (photoFile) {
+              formData.append("photo", photoFile);
+          }
+
+          // Envoyer les données au serveur
+          fetch('save_dataform.php', {
+              method: 'POST',
+              body: formData
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Erreur réseau');
+              }
+              return response.json();
+          })
+          .then(data => {
+              console.log('Réponse save_dataform:', data); // Pour le débogage
+              if(data.success) {
+                  // Générer la carte
+                  window.location.href = 'generate_carte.php?id=' + data.memberId;
+              } else {
+                  alert("Erreur lors de l'enregistrement des données: " + (data.error || 'Erreur inconnue'));
+              }
+          })
+          .catch(error => {
+              console.error('Erreur détaillée:', error);
+              alert("Erreur lors de l'envoi des données: " + error.message);
+          });
+      });
+  </script>
+</body>
+</html>
