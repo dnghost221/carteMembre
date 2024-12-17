@@ -16,7 +16,7 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     $membre = $result->fetch_assoc();
-    $photoBase64 = '';
+    $photoBase64 = '';  
     if ($membre['photo']) {
         $photoBase64 = base64_encode($membre['photo']);
     }
