@@ -129,6 +129,46 @@
               alert("Erreur lors de l'envoi des données: " + error.message);
           });
       });
+
+      async function checkCniExists(cni) {
+          try {
+              const response = await fetch('check_document.php?type=cni&value=' + encodeURIComponent(cni));
+              const data = await response.json();
+              return data.exists;
+          } catch (error) {
+              console.error('Erreur lors de la vérification de la CNI:', error);
+              return false;
+          }
+      }
+
+      async function checkElecteurExists(electeur) {
+          try {
+              const response = await fetch('check_document.php?type=electeur&value=' + encodeURIComponent(electeur));
+              const data = await response.json();
+              return data.exists;
+          } catch (error) {
+              console.error('Erreur lors de la vérification de la carte électeur:', error);
+              return false;
+          }
+      }
+
+      document.getElementById("cni").addEventListener('blur', async function(e) {
+          const cni = e.target.value;
+          if (await checkCniExists(cni)) {
+              alert("Ce numéro de CNI est déjà utilisé");
+              e.target.value = '';
+              e.target.focus();
+          }
+      });
+
+      document.getElementById("electeur").addEventListener('blur', async function(e) {
+          const electeur = e.target.value;
+          if (await checkElecteurExists(electeur)) {
+              alert("Ce numéro de carte d'électeur est déjà utilisé");
+              e.target.value = '';
+              e.target.focus();
+          }
+      });
   </script>
 </body>
 </html>
