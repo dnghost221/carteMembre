@@ -4,9 +4,9 @@ define('ENV', 'development'); // Changer en 'production' une fois en ligne
 
 // Configuration de l'URL de base
 if (ENV === 'development') {
-    define('BASE_URL', 'http://localhost/carteMembre/');
+    define('BASE_URL', 'https://d57b-196-207-204-230.ngrok-free.app/carteMembre/carte_membre/');
 } else {
-    define('BASE_URL', 'https://localhost/carteMembre/'); // À remplacer par votre vrai domaine
+    define('BASE_URL', 'https://d57b-196-207-204-230.ngrok-free.app/carteMembre/carte_membre/'); // À remplacer par votre vrai domaine
 }
 
 // Configuration de la base de données

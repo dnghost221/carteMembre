@@ -28,7 +28,10 @@ if (isset($data['imageData']) && isset($data['memberId'])) {
     
     // Sauvegarder l'image
     if (file_put_contents($fileName, $imageData)) {
-        // Connexion à la base de données pour récupérer le numéro de téléphone
+        // Créer l'URL complète de la carte
+        $carte_url = BASE_URL . $fileName;
+        
+        // Connexion à la base de données
         $servername = "localhost";
         $username = "root";
         $password = "";
@@ -41,6 +44,16 @@ if (isset($data['imageData']) && isset($data['memberId'])) {
             exit;
         }
 
+        // Mettre à jour l'URL de la carte dans la base de données
+        $update_sql = "UPDATE carte_membre SET carte_url = ? WHERE id = ?";
+        $update_stmt = $conn->prepare($update_sql);
+        $update_stmt->bind_param("si", $carte_url, $memberId);
+        
+        if (!$update_stmt->execute()) {
+            error_log("Erreur lors de la mise à jour de l'URL dans la base de données");
+        }
+        $update_stmt->close();
+
         // Récupérer le numéro de téléphone
         $sql = "SELECT tel FROM carte_membre WHERE id = ?";
         $stmt = $conn->prepare($sql);
@@ -50,9 +63,6 @@ if (isset($data['imageData']) && isset($data['memberId'])) {
         
         if ($row = $result->fetch_assoc()) {
             $phone_number = $row['tel'];
-            
-            // Créer l'URL complète de la carte
-            $carte_url = BASE_URL . $fileName;
             
             // Nettoyer le numéro de téléphone
             $clean_number = preg_replace('/[^0-9]/', '', $phone_number);

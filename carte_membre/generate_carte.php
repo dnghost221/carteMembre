@@ -98,17 +98,26 @@ if ($result->num_rows > 0) {
                 .then(data => {
                     console.log('Réponse du serveur:', data);
                     if (data.success) {
-                        alert('Carte générée avec succès ! Un message WhatsApp a été envoyé.');
-                        setTimeout(() => {
-                            window.location.href = 'formulaire.html';
-                        }, 3000);
+                        // Envoyer le lien via WhatsApp immédiatement
+                        return fetch('send_carte_link.php?id=<?php echo $membre['id']; ?>');
                     } else {
-                        alert('Erreur: ' + (data.error || 'Erreur inconnue'));
+                        throw new Error(data.error || 'Erreur inconnue');
                     }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Carte générée et envoyée avec succès !');
+                    } else {
+                        alert('Carte générée mais erreur lors de l\'envoi : ' + data.error);
+                    }
+                    setTimeout(() => {
+                        window.location.href = 'formulaire.html';
+                    }, 3000);
                 })
                 .catch(error => {
                     console.error('Erreur détaillée:', error);
-                    alert('Erreur lors de la génération de la carte');
+                    alert('Erreur: ' + error.message);
                 });
             });
         };
