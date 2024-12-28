@@ -98,22 +98,23 @@ if ($result->num_rows > 0) {
                 .then(data => {
                     console.log('Réponse du serveur:', data);
                     if (data.success) {
-                        // Envoyer le lien via WhatsApp immédiatement
-                        return fetch('send_carte_link.php?id=<?php echo $membre['id']; ?>');
+                        // Faire une requête pour obtenir le lien WhatsApp
+                        fetch(`send_carte_link.php?id=<?php echo $membre['id']; ?>`)
+                            .then(response => response.json())
+                            .then(whatsappData => {
+                                if (whatsappData.success) {
+                                    window.location.href = whatsappData.whatsapp_link;
+                                } else {
+                                    alert('Erreur lors de la génération du lien WhatsApp: ' + whatsappData.error);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Erreur WhatsApp:', error);
+                                alert('Erreur lors de la génération du lien WhatsApp');
+                            });
                     } else {
-                        throw new Error(data.error || 'Erreur inconnue');
+                        alert('Erreur lors de la sauvegarde de la carte : ' + data.error);
                     }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Carte générée et envoyée avec succès !');
-                    } else {
-                        alert('Carte générée mais erreur lors de l\'envoi : ' + data.error);
-                    }
-                    setTimeout(() => {
-                        window.location.href = 'formulaire.html';
-                    }, 3000);
                 })
                 .catch(error => {
                     console.error('Erreur détaillée:', error);

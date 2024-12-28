@@ -40,46 +40,15 @@ try {
         $clean_number = '221' . $clean_number;
     }
 
-    // Préparer le message WhatsApp
-    $message = [
-        'messaging_product' => 'whatsapp',
-        'to' => $clean_number,
-        'type' => 'text',
-        'text' => [
-            'body' => "Voici votre carte de membre : " . $membre['carte_url']
-        ]
-    ];
+    // Créer le lien WhatsApp direct
+    $message = urlencode("Voici votre carte de membre : " . $membre['carte_url']);
+    $whatsapp_link = "https://wa.me/" . $clean_number . "?text=" . $message;
 
-    // Envoyer le message via l'API WhatsApp
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/v21.0/'.WHATSAPP_PHONE_NUMBER_ID.'/messages');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($message));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Bearer ' . WHATSAPP_TOKEN,
-        'Content-Type: application/json'
+    // Retourner le lien
+    echo json_encode([
+        'success' => true,
+        'whatsapp_link' => $whatsapp_link
     ]);
-
-    $response = curl_exec($ch);
-    $error = curl_error($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($error) {
-        throw new Exception('Erreur cURL: ' . $error);
-    }
-
-    $response_data = json_decode($response, true);
-    if ($http_code == 200) {
-        echo json_encode([
-            'success' => true,
-            'message' => 'Lien de la carte envoyé avec succès',
-            'whatsapp_message_id' => $response_data['messages'][0]['id']
-        ]);
-    } else {
-        throw new Exception($response_data['error']['message'] ?? 'Erreur lors de l\'envoi du message WhatsApp');
-    }
 
 } catch (Exception $e) {
     echo json_encode([
